@@ -1,11 +1,11 @@
-name: schema-test
+name: build-infra-integration
 
 on:
   pull_request: {}
   workflow_dispatch: {}
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Run tests
-        run: yarn test
-        env:
-          BASE: ${{ github.event.pull_request.base.ref }}
+      - name: Build latest published specification
+        if: ${{ hashFiles('versions/*.md') != '' }}
+        run: yarn build latest
+
+      - name: Build source specification
+        if: ${{ hashFiles('src/*.md') != '' }}
+        run: yarn build src
