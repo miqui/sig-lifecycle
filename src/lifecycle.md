@@ -43,7 +43,7 @@ Applying the same lifecycle metadata uniformly across many operations remains
 the job of [Overlays](https://spec.openapis.org/overlay/latest.html), not of
 this object.
 
-**Non-goal.** This specification does not replace `deprecated: true`, which
+**Non-goal.** This SAF does not replace `deprecated: true`, which
 remains the coarse signal tooling already recognizes (for example, to gray out
 an operation in Swagger UI). The Lifecycle Object is additional detail used
 alongside it.
@@ -110,10 +110,10 @@ throughout the OAS for this purpose.
 
 ```yaml
 paths:
-  /v1/pets:
+  /v1/flights:
     get:
-      operationId: listPets_v1
-      summary: List all pets
+      operationId: listFlights_v1
+      summary: List all flights
       deprecated: true
       features:
         lifecycle:
@@ -123,7 +123,7 @@ paths:
             description: Migration guide
             url: https://docs.example.com/migrate
           replacement:
-            description: Pets API v2
+            description: Flights API v2
             url: https://api.example.com/v2/openapi.yaml
           sunset:
             date: "2025-07-01T00:00:00Z"
