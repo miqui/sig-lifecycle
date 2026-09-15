@@ -62,7 +62,7 @@ is placed under `features` on the Operation Object:
 
 ```yaml
 paths:
-  /pets:
+  /flights:
     get:
       deprecated: true
       features:
