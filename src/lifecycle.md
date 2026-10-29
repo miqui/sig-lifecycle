@@ -50,38 +50,60 @@ alongside it.
 
 ## Relationship to the OpenAPI Specification
 
-The Lifecycle Specification defines the **Lifecycle Object**, which appears
-under the `features` field introduced in OpenAPI 3.3 as a Standardized API
-Feature (SAF) — see
+The Lifecycle Specification is a companion specification defining a
+[Standardized API Feature](https://spec.openapis.org/oas/v3.3.0.html#standardized-api-features)
+(SAF) for OpenAPI 3.3 and later — see
 [OAI/OpenAPI-Specification discussion #5310](https://github.com/OAI/OpenAPI-Specification/discussions/5310)
 for background on the SAF concept, and
-[discussion #5350](https://github.com/OAI/OpenAPI-Specification/discussions/5350)
-for how SAFs are expected to declare their version within a document. Because
-the Lifecycle Object is scoped to individual operations (see Introduction), it
-is placed under `features` on the Operation Object:
+[OAI/OpenAPI-Specification#5447](https://github.com/OAI/OpenAPI-Specification/pull/5447)
+for how SAFs are declared.
+
+An OpenAPI document opts in to this specification by naming it in the
+`features` field of the OpenAPI Object, which maps SAF names to the version
+of each companion specification in use:
+
+```yaml
+openapi: 3.3.0
+features:
+  security: 1.0.0
+  lifecycle: 1.0.0
+```
+
+Because the default value of `features` is `{"security": "1.0.0"}`, a
+document that sets `features` explicitly MUST also list `security` to keep
+the OAS 3.2-compatible security behavior. As required by the OAS, all
+documents in a multi-document OpenAPI Description MUST declare the same SAFs.
+
+When `lifecycle` is declared in `features`, the Operation Object gains the
+`lifecycle` field defined in [Operation Object Fields](#operation-object-fields).
+The Lifecycle Object is scoped to individual operations (see Introduction):
 
 ```yaml
 paths:
   /flights:
     get:
       deprecated: true
-      features:
-        lifecycle:
-          # Lifecycle Object fields here
+      lifecycle:
+        # Lifecycle Object fields here
 ```
-
-As proposed for SAFs generally, a document using this feature is expected to
-declare which version of it is in use (for example, via a document-scoped
-`usingFeatures` or `usingFeatureGroups` field), independently of the
-`openapi` version itself. That mechanism is still being defined by the SAF
-work referenced above; this specification will adopt it once it lands rather
-than defining a competing one.
 
 Compatibility between versions of this specification and versions of the OpenAPI
 Specification is determined by publication date. The rules for determining
 compatible version pairs are documented in [TODO: link or section].
 
 ## Definitions
+
+### Operation Object Fields
+
+When a document declares `lifecycle` in its `features` field, the following
+field is added to the [Operation Object](https://spec.openapis.org/oas/v3.3.0.html#operation-object):
+
+| Field Name | Type | Description |
+| ---- | ---- | ---- |
+| `lifecycle` | [Lifecycle Object](#lifecycle-object) | Deprecation and sunset details for this operation. |
+
+A `lifecycle` field on an Operation Object in a document that does not
+declare `lifecycle` in `features` is not governed by this specification.
 
 ### Lifecycle Object
 
@@ -115,21 +137,109 @@ paths:
       operationId: listFlights_v1
       summary: List all flights
       deprecated: true
-      features:
-        lifecycle:
-          date: "2025-01-15T00:00:00Z"
-          reason: "Replaced by v2 API with improved performance."
-          migration:
-            description: Migration guide
-            url: https://docs.example.com/migrate
-          replacement:
-            description: Flights API v2
-            url: https://api.example.com/v2/openapi.yaml
-          sunset:
-            date: "2025-07-01T00:00:00Z"
-            policy:
-              url: https://docs.example.com/sunset-policy
+      lifecycle:
+        date: "2025-01-15T00:00:00Z"
+        reason: "Replaced by v2 API with improved performance."
+        migration:
+          description: Migration guide
+          url: https://docs.example.com/migrate
+        replacement:
+          description: Flights API v2
+          url: https://api.example.com/v2/openapi.yaml
+        sunset:
+          date: "2025-07-01T00:00:00Z"
+          policy:
+            url: https://docs.example.com/sunset-policy
 ```
+
+#### Complete OpenAPI Description Example
+
+This example is **informative**. It shows the Lifecycle SAF in a complete
+OpenAPI 3.3 document, alongside the `externalLinks` field from the
+[Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md).
+That proposal replaces the single `externalDocs` field with an
+`externalLinks` array and adds optional `summary` and `kind` fields to the
+External Documentation Object. Because `migration`, `replacement`, and
+`sunset.policy` reuse the External Documentation Object, they gain `summary`
+and `kind` without any change to this specification. The `kind` values shown
+are illustrative.
+
+The Lifecycle Object stays the structured source for deprecation and sunset
+data. `externalLinks` holds other resources that help consumers through the
+transition, such as a changelog or an announcement.
+
+```yaml
+openapi: 3.3.0
+features:
+  security: 1.0.0   # listed explicitly because `features` is set
+  lifecycle: 1.0.0
+info:
+  title: Flights API
+  version: 2.0.0
+externalLinks:
+  - url: https://docs.example.com/flights
+    summary: Flights API documentation
+    kind: api-docs
+  - url: https://docs.example.com/changelog
+    summary: Flights API changelog
+    kind: changelog
+paths:
+  /v1/flights:
+    get:
+      operationId: listFlights_v1
+      summary: List all flights
+      deprecated: true
+      externalLinks:
+        - url: https://docs.example.com/changelog#2025-01-15
+          summary: Changelog entry announcing the v1 deprecation
+          kind: changelog
+        - url: https://status.example.com/announcements/flights-v1-sunset
+          summary: Sunset announcement
+          description: |
+            Timeline, support contacts, and FAQ for the retirement of
+            `GET /v1/flights`.
+          kind: announcement
+      lifecycle:
+        date: "2025-01-15T00:00:00Z"
+        reason: "Replaced by v2 API with improved performance."
+        migration:
+          summary: Migrating from Flights v1 to v2
+          description: |
+            Step-by-step guide covering renamed query parameters and the
+            new cursor-based pagination.
+          url: https://docs.example.com/migrate
+          kind: migration-guide
+        replacement:
+          summary: Flights API v2
+          description: Use `listFlights_v2` (`GET /v2/flights`) instead.
+          url: https://api.example.com/v2/openapi.yaml
+          kind: openapi
+        sunset:
+          date: "2025-07-01T00:00:00Z"
+          policy:
+            summary: API sunset policy
+            url: https://docs.example.com/sunset-policy
+            kind: policy
+      responses:
+        "200":
+          description: A list of flights.
+  /v2/flights:
+    get:
+      operationId: listFlights_v2
+      summary: List all flights
+      externalLinks:
+        - url: https://docs.example.com/flights/v2
+          summary: Flights API v2 reference
+          kind: api-docs
+      responses:
+        "200":
+          description: A page of flights.
+```
+
+Only Lifecycle Object fields participate in the
+[Header Mapping](#header-mapping); entries in `externalLinks` do not generate
+`Deprecation`, `Sunset`, or `Link` headers. A server would emit the same
+headers for `GET /v1/flights` here as for the [example](#example) above.
 
 ### Sunset Object
 
@@ -222,8 +332,9 @@ with that shape:
   applies to.
 
 From April 2026 onward, the design shifted to the operation-scoped model in
-this document: `deprecation` (renamed `Lifecycle Object` under `features` per
-the emerging [SAF](https://github.com/OAI/OpenAPI-Specification/discussions/5310)
+this document: `deprecation` (renamed `Lifecycle Object`, placed in the
+Operation Object's `lifecycle` field, and enabled through the root `features`
+declaration per the [SAF](https://github.com/OAI/OpenAPI-Specification/pull/5447)
 convention) is the primary object, with `sunset` nested inside it, and
 `gracePeriod` was dropped as derivable from `deprecation.date` and
 `sunset.date` together. See
@@ -240,7 +351,7 @@ can use the Lifecycle Object in two distinct phases:
 1. **Tool registration (design-time, from the spec).** When registering an
    operation as a tool, a server can fold `reason`, and the `migration` and
    `replacement` links, into the tool's description — for example, prefixing
-   it with `"⚠ DEPRECATED — sunset 2025-07-01. Use listPets_v2 instead."` A
+   it with `"⚠ DEPRECATED — sunset 2025-07-01. Use listFlights_v2 instead."` A
    well-behaved LLM client that reads this before deciding whether to invoke
    the tool should prefer the replacement from the outset, without ever
    calling the deprecated one.
