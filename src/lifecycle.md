@@ -171,7 +171,7 @@ transition, such as a changelog or an announcement.
 ```yaml
 openapi: 3.3.0
 features:
-  security: 1.0.0   # listed explicitly because `features` is set
+  security: 1.0.0   
   lifecycle: 1.0.0
 info:
   title: Flights API
