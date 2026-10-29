@@ -273,12 +273,6 @@ Object's `externalLinks` with `kind: sunset`.
 | ---- | ---- | ---- |
 | `date` | `string` (date-time) | **REQUIRED.** The date after which the operation is expected to stop accepting requests. |
 
-### Schema Object
-
-A **Schema Object** is a JSON Schema schema as defined by the OpenAPI Specification
-in use. Within this document, Schema Objects behave according to the OAS dialect
-in effect in the containing OpenAPI document.
-
 ## Specification
 
 ### Version `1.0`
@@ -296,10 +290,11 @@ interpreted as described in [RFC2119](https://tools.ietf.org/html/rfc2119).
 Implementations that validate Lifecycle Objects MUST use the schema published at
 `https://spec.openapis.org/lifecycle/1.0/schema/WORK-IN-PROGRESS`.
 
-When validating a Lifecycle Object within an OpenAPI document, the Schema Object
-schema in effect is determined by the OAS dialect declared in that document.
-Standalone validation of Lifecycle Objects uses the standard JSON Schema
-2020-12 dialect for Schema Object positions.
+The Lifecycle Object contains no Schema Objects, so validation does not depend
+on the OAS dialect in effect in the containing document. The schema includes
+its own definition of the External Documentation Object, as extended by the
+[Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md),
+and requires `kind` on each entry in `externalLinks`.
 
 ### Header Mapping
 
