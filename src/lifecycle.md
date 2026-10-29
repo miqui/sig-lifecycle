@@ -154,6 +154,14 @@ deprecated, even if a `lifecycle` field is present. In that case, tools:
   descriptions;
 * MAY warn that the `lifecycle` field is ignored.
 
+This specification does not change the meaning of `deprecated: true` when
+there is no `lifecycle` field. An operation can be marked deprecated without
+this SAF, as before, which allows APIs to adopt the Lifecycle Object
+gradually. The full value comes from using both: `deprecated: true` as the
+signal that existing tools already recognize, and the Lifecycle Object for
+the dates, reason, and links that tools need to explain the deprecation and
+generate headers.
+
 #### Lifecycle Link Kinds
 
 This specification defines the following `kind` values for entries in
