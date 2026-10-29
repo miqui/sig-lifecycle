@@ -135,6 +135,25 @@ documentation, belong in the Operation Object's own `externalLinks`. Only
 entries in `lifecycle.externalLinks` participate in the
 [Header Mapping](#header-mapping).
 
+#### Relationship to `deprecated`
+
+The Operation Object's `deprecated` field is the authoritative signal of
+whether an operation is deprecated, and takes precedence over the Lifecycle
+Object. The Lifecycle Object only adds detail to an operation that
+`deprecated` already marks as deprecated.
+
+An Operation Object with a `lifecycle` field SHOULD set `deprecated: true`.
+
+If `deprecated` is absent or `false`, tools MUST treat the operation as not
+deprecated, even if a `lifecycle` field is present. In that case, tools:
+
+* MUST NOT generate `Deprecation`, `Sunset`, or `Link` headers from the
+  Lifecycle Object;
+* MUST NOT present the operation as deprecated or scheduled for sunset, for
+  example in generated documentation, `@deprecated` annotations, or tool
+  descriptions;
+* MAY warn that the `lifecycle` field is ignored.
+
 #### Lifecycle Link Kinds
 
 This specification defines the following `kind` values for entries in
@@ -302,7 +321,9 @@ This section is **informative**. The Lifecycle Object describes deprecation
 and sunset *behavior*; the HTTP headers below are a byproduct a server MAY
 choose to generate from that description at runtime. An OpenAPI description
 alone does not cause a server to emit these headers — that requires runtime
-support in the API implementation or gateway.
+support in the API implementation or gateway. Headers are only generated for
+operations with `deprecated: true`; see
+[Relationship to `deprecated`](#relationship-to-deprecated).
 
 Tools that do generate headers from a Lifecycle Object SHOULD use the
 following mapping:
