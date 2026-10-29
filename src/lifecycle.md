@@ -108,10 +108,11 @@ declare `lifecycle` in `features` is not governed by this specification.
 ### Lifecycle Object
 
 A **Lifecycle Object** describes the deprecation and sunset status of a
-single operation: when the deprecation took effect, why, where to find a
-migration guide and a replacement, and when the operation will stop accepting
-requests. It is optional, and is meant to complement — not replace —
-`deprecated: true` on the same Operation Object.
+single operation: when the deprecation took effect, why, when the operation
+will stop accepting requests, and links to related resources such as a
+migration guide, a replacement, and a sunset policy. It is optional, and is
+meant to complement — not replace — `deprecated: true` on the same Operation
+Object.
 
 #### Lifecycle Object Fixed Fields
 
@@ -119,14 +120,36 @@ requests. It is optional, and is meant to complement — not replace —
 | ---- | ---- | ---- |
 | `date` | `string` (date-time) | **REQUIRED.** The date the deprecation takes or took effect. |
 | `reason` | `string` | A human-readable explanation of why the operation is deprecated. |
-| `migration` | [External Documentation Object](https://spec.openapis.org/oas/latest.html#external-documentation-object) | A description of, and link to, a migration guide. |
-| `replacement` | [External Documentation Object](https://spec.openapis.org/oas/latest.html#external-documentation-object) | A description of, and link to, the operation or API that replaces this one. |
 | `sunset` | [Sunset Object](#sunset-object) | Sunset details for this operation. |
+| `externalLinks` | [[External Documentation Object](https://spec.openapis.org/oas/v3.3.0.html#external-documentation-object)] | Links to resources related to this operation's deprecation and sunset. Each entry MUST include `kind`. See [Lifecycle Link Kinds](#lifecycle-link-kinds). |
 
-`migration` and `replacement` reuse the OpenAPI Specification's existing
-External Documentation Object rather than introducing new object types, since
-both are fundamentally a described link — the same shape already used
-throughout the OAS for this purpose.
+`externalLinks` uses the same array of External Documentation Objects as the
+`externalLinks` field on the OpenAPI, Operation, Tag, and Schema Objects (see
+the [Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md)),
+including its `summary` and `kind` fields. This specification therefore
+requires an OpenAPI Specification version that defines those fields.
+
+Links that concern the operation's deprecation or sunset belong in
+`lifecycle.externalLinks`. Other resources, such as general API reference
+documentation, belong in the Operation Object's own `externalLinks`. Only
+entries in `lifecycle.externalLinks` participate in the
+[Header Mapping](#header-mapping).
+
+#### Lifecycle Link Kinds
+
+This specification defines the following `kind` values for entries in
+`lifecycle.externalLinks`. Each value is the name of an IANA-registered link
+relation, so a link's `kind` is also the `rel` of the `Link` header it maps to.
+
+| `kind` | Meaning | Cardinality | Link relation |
+| ---- | ---- | ---- | ---- |
+| `deprecation` | Human-readable information about the deprecation, typically a migration guide. | SHOULD appear at most once. | [RFC 9745 §3](https://www.rfc-editor.org/rfc/rfc9745#section-3) |
+| `successor-version` | The operation or API that replaces this one. | MAY appear more than once, for example when both a v2 and a v3 replace this operation. | [RFC 5829](https://www.rfc-editor.org/rfc/rfc5829) |
+| `sunset` | A human-readable sunset policy. | SHOULD appear at most once. | [RFC 8594 §6](https://www.rfc-editor.org/rfc/rfc8594#section-6) |
+
+Entries MAY use other `kind` values, such as `changelog` or `announcement`.
+Entries with other values are documentation only and have no header
+equivalent.
 
 #### Example
 
@@ -140,33 +163,30 @@ paths:
       lifecycle:
         date: "2025-01-15T00:00:00Z"
         reason: "Replaced by v2 API with improved performance."
-        migration:
-          description: Migration guide
-          url: https://docs.example.com/migrate
-        replacement:
-          description: Flights API v2
-          url: https://api.example.com/v2/openapi.yaml
         sunset:
           date: "2025-07-01T00:00:00Z"
-          policy:
+        externalLinks:
+          - kind: deprecation
+            summary: Migration guide
+            url: https://docs.example.com/migrate
+          - kind: successor-version
+            summary: Flights API v2
+            url: https://api.example.com/v2/openapi.yaml
+          - kind: sunset
+            summary: API sunset policy
             url: https://docs.example.com/sunset-policy
 ```
 
 #### Complete OpenAPI Description Example
 
 This example is **informative**. It shows the Lifecycle SAF in a complete
-OpenAPI 3.3 document, alongside the `externalLinks` field from the
-[Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md).
-That proposal replaces the single `externalDocs` field with an
-`externalLinks` array and adds optional `summary` and `kind` fields to the
-External Documentation Object. Because `migration`, `replacement`, and
-`sunset.policy` reuse the External Documentation Object, they gain `summary`
-and `kind` without any change to this specification. The `kind` values shown
-are illustrative.
+OpenAPI 3.3 document. The document uses `externalLinks` at three levels:
 
-The Lifecycle Object stays the structured source for deprecation and sunset
-data. `externalLinks` holds other resources that help consumers through the
-transition, such as a changelog or an announcement.
+* at the root, for documentation about the whole API;
+* on the Operation Object, for general resources about one operation;
+* in the Lifecycle Object, for links about the operation's deprecation and
+  sunset, including documentation-only kinds such as `changelog` and
+  `announcement`.
 
 ```yaml
 openapi: 3.3.0
@@ -190,36 +210,37 @@ paths:
       summary: List all flights
       deprecated: true
       externalLinks:
-        - url: https://docs.example.com/changelog#2025-01-15
-          summary: Changelog entry announcing the v1 deprecation
-          kind: changelog
-        - url: https://status.example.com/announcements/flights-v1-sunset
-          summary: Sunset announcement
-          description: |
-            Timeline, support contacts, and FAQ for the retirement of
-            `GET /v1/flights`.
-          kind: announcement
+        - url: https://docs.example.com/flights/v1
+          summary: Flights API v1 reference
+          kind: api-docs
       lifecycle:
         date: "2025-01-15T00:00:00Z"
         reason: "Replaced by v2 API with improved performance."
-        migration:
-          summary: Migrating from Flights v1 to v2
-          description: |
-            Step-by-step guide covering renamed query parameters and the
-            new cursor-based pagination.
-          url: https://docs.example.com/migrate
-          kind: migration-guide
-        replacement:
-          summary: Flights API v2
-          description: Use `listFlights_v2` (`GET /v2/flights`) instead.
-          url: https://api.example.com/v2/openapi.yaml
-          kind: openapi
         sunset:
           date: "2025-07-01T00:00:00Z"
-          policy:
+        externalLinks:
+          - kind: deprecation
+            summary: Migrating from Flights v1 to v2
+            description: |
+              Step-by-step guide covering renamed query parameters and the
+              new cursor-based pagination.
+            url: https://docs.example.com/migrate
+          - kind: successor-version
+            summary: Flights API v2
+            description: Use `listFlights_v2` (`GET /v2/flights`) instead.
+            url: https://api.example.com/v2/openapi.yaml
+          - kind: sunset
             summary: API sunset policy
             url: https://docs.example.com/sunset-policy
-            kind: policy
+          - kind: changelog
+            summary: Changelog entry announcing the v1 deprecation
+            url: https://docs.example.com/changelog#2025-01-15
+          - kind: announcement
+            summary: Sunset announcement
+            description: |
+              Timeline, support contacts, and FAQ for the retirement of
+              `GET /v1/flights`.
+            url: https://status.example.com/announcements/flights-v1-sunset
       responses:
         "200":
           description: A list of flights.
@@ -236,22 +257,21 @@ paths:
           description: A page of flights.
 ```
 
-Only Lifecycle Object fields participate in the
-[Header Mapping](#header-mapping); entries in `externalLinks` do not generate
-`Deprecation`, `Sunset`, or `Link` headers. A server would emit the same
-headers for `GET /v1/flights` here as for the [example](#example) above.
+The `changelog` and `announcement` links and the Operation Object's own
+`externalLinks` do not generate headers. A server would emit the same headers
+for `GET /v1/flights` here as for the [example](#example) above.
 
 ### Sunset Object
 
 A **Sunset Object** describes when an operation is expected to stop accepting
-requests entirely.
+requests entirely. A link to a sunset policy is given in the Lifecycle
+Object's `externalLinks` with `kind: sunset`.
 
 #### Sunset Object Fixed Fields
 
 | Field Name | Type | Description |
 | ---- | ---- | ---- |
 | `date` | `string` (date-time) | **REQUIRED.** The date after which the operation is expected to stop accepting requests. |
-| `policy` | [External Documentation Object](https://spec.openapis.org/oas/latest.html#external-documentation-object) | A link to a human-readable sunset policy. |
 
 ### Schema Object
 
@@ -295,13 +315,17 @@ following mapping:
 | Lifecycle Object field | Generated header | RFC |
 | ---- | ---- | ---- |
 | `date` | `Deprecation: @<epoch-seconds>` | [RFC 9745 §2.1](https://www.rfc-editor.org/rfc/rfc9745#section-2.1), timestamp format per [RFC 9651 §3.3.7](https://www.rfc-editor.org/rfc/rfc9651#section-3.3.7) |
-| `migration.url` | `Link: <url>; rel="deprecation"; type="text/html"` | [RFC 9745 §3.1](https://www.rfc-editor.org/rfc/rfc9745#section-3.1) + [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
-| `replacement.url` | `Link: <url>; rel="successor-version"` | [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
 | `sunset.date` | `Sunset: <IMF-fixdate>` | [RFC 8594 §3](https://www.rfc-editor.org/rfc/rfc8594#section-3), date format per [RFC 9110 §5.6.7](https://www.rfc-editor.org/rfc/rfc9110#section-5.6.7) |
-| `sunset.policy.url` | `Link: <url>; rel="sunset"` | [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
+| `externalLinks` entry with `kind: deprecation` | `Link: <url>; rel="deprecation"; type="text/html"` | [RFC 9745 §3](https://www.rfc-editor.org/rfc/rfc9745#section-3) + [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
+| `externalLinks` entry with `kind: successor-version` | `Link: <url>; rel="successor-version"` | [RFC 5829](https://www.rfc-editor.org/rfc/rfc5829) + [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
+| `externalLinks` entry with `kind: sunset` | `Link: <url>; rel="sunset"` | [RFC 8594 §6](https://www.rfc-editor.org/rfc/rfc8594#section-6) + [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) |
 
-`reason`, `migration.description`, and `replacement.description` have no
-header equivalent — they are documentation-only fields, intended for
+Each `externalLinks` entry with one of these kinds generates its own `Link`
+header, so two `successor-version` entries generate two headers. Entries with
+any other `kind` do not generate headers.
+
+`reason`, and the `summary` and `description` of every `externalLinks` entry,
+have no header equivalent — they are documentation-only fields, intended for
 doc-gen and SDK-gen tools (for example, as the body of a generated
 `@deprecated` annotation).
 
@@ -337,7 +361,14 @@ Operation Object's `lifecycle` field, and enabled through the root `features`
 declaration per the [SAF](https://github.com/OAI/OpenAPI-Specification/pull/5447)
 convention) is the primary object, with `sunset` nested inside it, and
 `gracePeriod` was dropped as derivable from `deprecation.date` and
-`sunset.date` together. See
+`sunset.date` together.
+
+In October 2026, the separate `migration`, `replacement`, and `sunset.policy`
+link fields were replaced by a single `externalLinks` array in the Lifecycle
+Object, aligning with the
+[Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md).
+Link kinds use IANA link relation names, so each link maps directly to a
+`Link` header. See
 [sig-lifecycle discussion #5](https://github.com/OAI/sig-lifecycle/discussions/5)
 for the full history.
 
@@ -349,8 +380,8 @@ Servers that expose OpenAPI operations as tools (for example, MCP servers)
 can use the Lifecycle Object in two distinct phases:
 
 1. **Tool registration (design-time, from the spec).** When registering an
-   operation as a tool, a server can fold `reason`, and the `migration` and
-   `replacement` links, into the tool's description — for example, prefixing
+   operation as a tool, a server can fold `reason`, and the `deprecation` and
+   `successor-version` links, into the tool's description — for example, prefixing
    it with `"⚠ DEPRECATED — sunset 2025-07-01. Use listFlights_v2 instead."` A
    well-behaved LLM client that reads this before deciding whether to invoke
    the tool should prefer the replacement from the outset, without ever
@@ -362,7 +393,7 @@ can use the Lifecycle Object in two distinct phases:
    and the successor tool, giving the LLM what it needs to relay the warning
    or retry with the replacement.
 
-Naming the `replacement` link and its `description` clearly (in language an
+Writing the `successor-version` link's `summary` and `description` clearly (in language an
 LLM would recognize as migration- or deprecation-related) is what makes phase
 1 effective — the mechanism is ordinary metadata, but the wording carries the
 signal.
