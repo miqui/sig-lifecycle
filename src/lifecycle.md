@@ -51,7 +51,7 @@ alongside it.
 ## Relationship to the OpenAPI Specification
 
 The Lifecycle Specification is a companion specification defining a
-[Standardized API Feature](https://spec.openapis.org/oas/v3.3.0.html#standardized-api-features)
+[Standardized API Feature](https://github.com/OAI/OpenAPI-Specification/blob/v3.3-dev/src/oas.md#standardized-api-features)
 (SAF) for OpenAPI 3.3 and later — see
 [OAI/OpenAPI-Specification discussion #5310](https://github.com/OAI/OpenAPI-Specification/discussions/5310)
 for background on the SAF concept, and
@@ -96,7 +96,7 @@ compatible version pairs are documented in [TODO: link or section].
 ### Operation Object Fields
 
 When a document declares `lifecycle` in its `features` field, the following
-field is added to the [Operation Object](https://spec.openapis.org/oas/v3.3.0.html#operation-object):
+field is added to the [Operation Object](https://spec.openapis.org/oas/latest.html#operation-object):
 
 | Field Name | Type | Description |
 | ---- | ---- | ---- |
@@ -121,7 +121,7 @@ Object.
 | `date` | `string` (date-time) | **REQUIRED.** The date the deprecation takes or took effect. |
 | `reason` | `string` | A human-readable explanation of why the operation is deprecated. |
 | `sunset` | [Sunset Object](#sunset-object) | Sunset details for this operation. |
-| `externalLinks` | [[External Documentation Object](https://spec.openapis.org/oas/v3.3.0.html#external-documentation-object)] | Links to resources related to this operation's deprecation and sunset. Each entry MUST include `kind`. See [Lifecycle Link Kinds](#lifecycle-link-kinds). |
+| `externalLinks` | [[External Documentation Object](https://spec.openapis.org/oas/latest.html#external-documentation-object)] | Links to resources related to this operation's deprecation and sunset. Each entry MUST include `kind`. See [Lifecycle Link Kinds](#lifecycle-link-kinds). |
 
 `externalLinks` uses the same array of External Documentation Objects as the
 `externalLinks` field on the OpenAPI, Operation, Tag, and Schema Objects (see
