@@ -54,7 +54,7 @@ $defs:
         type: string
       url:
         type: string
-        format: uri
+        format: uri-reference
       kind:
         type: string
     $ref: '#/$defs/specification-extensions'
