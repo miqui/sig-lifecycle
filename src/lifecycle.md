@@ -146,21 +146,17 @@ entries in `lifecycle.externalLinks` participate in the
 #### Relationship to `deprecated`
 
 The Operation Object's `deprecated` field is the authoritative signal of
-whether an operation is deprecated, and takes precedence over the Lifecycle
-Object. The Lifecycle Object only adds detail to an operation that
-`deprecated` already marks as deprecated.
+whether an operation is deprecated. The Lifecycle Object only adds detail to
+an operation that `deprecated` already marks as deprecated.
 
-An Operation Object with a `lifecycle` field SHOULD set `deprecated: true`.
+An Operation Object with a `lifecycle` field MUST set `deprecated: true`.
+If a `lifecycle` field is present and `deprecated` is absent or `false`, the
+OpenAPI Description is invalid, and tools MUST report an error rather than
+silently ignore the Lifecycle Object.
 
-If `deprecated` is absent or `false`, tools MUST treat the operation as not
-deprecated, even if a `lifecycle` field is present. In that case, tools:
-
-* MUST NOT generate `Deprecation`, `Sunset`, or `Link` headers from the
-  Lifecycle Object;
-* MUST NOT present the operation as deprecated or scheduled for sunset, for
-  example in generated documentation, `@deprecated` annotations, or tool
-  descriptions;
-* MAY warn that the `lifecycle` field is ignored.
+To announce a deprecation that takes effect in the future, set
+`deprecated: true` and give the future date in the Lifecycle Object's `date`
+field.
 
 This specification does not change the meaning of `deprecated: true` when
 there is no `lifecycle` field. An operation can be marked deprecated without
