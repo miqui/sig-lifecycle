@@ -118,9 +118,10 @@ declare `lifecycle` in `features` is not governed by this specification.
 A **Lifecycle Object** describes the deprecation and sunset status of a
 single operation: when the deprecation took effect, why, when the operation
 will stop accepting requests, and links to related resources such as a
-migration guide, a replacement, and a sunset policy. It is optional, and is
-meant to complement — not replace — `deprecated: true` on the same Operation
-Object.
+migration guide, a replacement, and a sunset policy. It is optional, and
+expands on the meaning of `deprecated: true`: it applies only to an Operation
+Object that sets `deprecated: true` (see
+[Relationship to `deprecated`](#relationship-to-deprecated)).
 
 #### Lifecycle Object Fixed Fields
 
@@ -134,8 +135,7 @@ Object.
 `externalLinks` uses the same array of External Documentation Objects as the
 `externalLinks` field on the OpenAPI, Operation, Tag, and Schema Objects (see
 the [Docs Links proposal](https://github.com/OAI/OpenAPI-Specification/blob/main/proposals/2026-08-01-Docs-Links.md)),
-including its `summary` and `kind` fields. This specification therefore
-requires an OpenAPI Specification version that defines those fields.
+including its `summary` and `kind` fields.
 
 Links that concern the operation's deprecation or sunset belong in
 `lifecycle.externalLinks`. Other resources, such as general API reference
