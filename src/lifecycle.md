@@ -182,6 +182,18 @@ Entries MAY use other `kind` values, such as `changelog` or `announcement`.
 Entries with other values are documentation only and have no header
 equivalent.
 
+#### Lifecycle Link Relations in Response Headers
+
+When a document declares `lifecycle` in its `features` field, the Lifecycle
+Object is the only way to describe `Link` headers with the `deprecation`,
+`successor-version`, or `sunset` relation. This applies to every operation in
+the document, whether or not the operation has a Lifecycle Object.
+
+A [Header Object](https://spec.openapis.org/oas/latest.html#header-object)
+for the `Link` header in a Response Object's `headers` MUST NOT describe a
+link with any of these relations, for example in its `description`,
+`schema`, or examples. Tools MUST report an error if it does.
+
 #### Example
 
 ```yaml
