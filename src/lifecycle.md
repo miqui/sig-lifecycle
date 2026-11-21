@@ -64,10 +64,10 @@ features:
   lifecycle: 1.0.0
 ```
 
-Because the default value of `features` is `{"security": "1.0.0"}`, a
-document that sets `features` explicitly MUST also list `security` to keep
-the OAS 3.2-compatible security behavior. As required by the OAS, all
-documents in a multi-document OpenAPI Description MUST declare the same SAFs.
+See
+[OpenAPI and SAF Specification Versions Across Multiple Documents](https://github.com/OAI/OpenAPI-Specification/blob/v3.3-dev/src/oas.md#openapi-and-saf-specification-versions-across-multiple-documents)
+in the OAS for guidance on declaring SAFs, including the default value of
+`features` and using SAFs across multiple OpenAPI Description documents.
 
 SAFs do not add fields directly to core OAS objects. Instead, each SAF's
 objects are placed under the `featureFields` field, keyed by the SAF's name.
