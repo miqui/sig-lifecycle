@@ -1,2 +1,3 @@
-# Only the required field
-date: "2025-01-15T00:00:00Z"
+# Only the required fields
+deprecation:
+  date: "2025-01-15T00:00:00Z"

@@ -1,0 +1,7 @@
+# successorLink belongs to the Deprecation Object
+deprecation:
+  date: "2025-01-15T00:00:00Z"
+sunset:
+  date: "2025-07-01T00:00:00Z"
+  successorLink:
+    url: https://api.example.com/v2/openapi.yaml

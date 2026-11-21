@@ -1,0 +1,4 @@
+# Unknown fields are not allowed in the Deprecation Object
+deprecation:
+  date: "2025-01-15T00:00:00Z"
+  sunsetDate: "2025-07-01T00:00:00Z"

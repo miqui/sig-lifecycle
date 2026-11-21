@@ -1,5 +1,5 @@
-date: "2025-01-15T00:00:00Z"
-externalLinks:
-  - kind: deprecation
-    description: 1
+deprecation:
+  date: "2025-01-15T00:00:00Z"
+  infoLink:
     url: https://docs.example.com/migrate
+    description: 1

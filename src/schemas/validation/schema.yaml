@@ -10,6 +10,18 @@ $defs:
     description: Deprecation and sunset status of a single operation.
     type: object
     required:
+      - deprecation
+    properties:
+      deprecation:
+        $ref: '#/$defs/deprecation'
+      sunset:
+        $ref: '#/$defs/sunset'
+    unevaluatedProperties: false
+
+  deprecation:
+    description: When and why an operation is deprecated, and what replaces it.
+    type: object
+    required:
       - date
     properties:
       date:
@@ -17,12 +29,12 @@ $defs:
         format: date-time
       reason:
         type: string
-      sunset:
-        $ref: '#/$defs/sunset'
+      infoLink:
+        $ref: '#/$defs/link'
+      successorLink:
+        $ref: '#/$defs/link'
       externalLinks:
-        type: array
-        items:
-          $ref: '#/$defs/lifecycle-link'
+        $ref: '#/$defs/external-links'
     unevaluatedProperties: false
 
   sunset:
@@ -34,13 +46,32 @@ $defs:
       date:
         type: string
         format: date-time
+      policyLink:
+        $ref: '#/$defs/link'
+      externalLinks:
+        $ref: '#/$defs/external-links'
     unevaluatedProperties: false
 
-  # An External Documentation Object in lifecycle.externalLinks, where kind is required.
-  lifecycle-link:
-    $ref: '#/$defs/external-documentation'
+  # A link that maps to a Link header; the relation comes from the field holding it.
+  link:
+    type: object
     required:
-      - kind
+      - url
+    properties:
+      url:
+        type: string
+        format: uri-reference
+      summary:
+        type: string
+      description:
+        type: string
+    $ref: '#/$defs/specification-extensions'
+    unevaluatedProperties: false
+
+  external-links:
+    type: array
+    items:
+      $ref: '#/$defs/external-documentation'
 
   # External Documentation Object as extended by the OAS Docs Links proposal.
   external-documentation:
