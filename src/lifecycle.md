@@ -74,26 +74,26 @@ document that sets `features` explicitly MUST also list `security` to keep
 the OAS 3.2-compatible security behavior. As required by the OAS, all
 documents in a multi-document OpenAPI Description MUST declare the same SAFs.
 
-When `lifecycle` is declared in `features`, the Operation Object gains the
-`lifecycle` field defined in [Operation Object Fields](#operation-object-fields).
-The Lifecycle Object is scoped to individual operations (see Introduction):
+SAFs do not add fields directly to core OAS objects. Instead, each SAF's
+objects are placed under the `featureFields` field, keyed by the SAF's name.
+When `lifecycle` is declared in `features`, the Lifecycle Object is placed
+under `featureFields` on the Operation Object, as described in
+[Feature Fields](#feature-fields). The Lifecycle Object is scoped to
+individual operations (see Introduction):
 
 ```yaml
 paths:
   /flights:
     get:
       deprecated: true
-      lifecycle:
-        # Lifecycle Object fields here
+      featureFields:
+        lifecycle:
+          # Lifecycle Object fields here
 ```
 
-**Editor's note.** The placement of the Lifecycle Object is provisional.
-SAFs are expected to place their objects under a container field that the OAS
-will define on the OpenAPI, Path Item, and Operation Objects, so that SAFs
-do not add fields directly to core objects. Once the OAS defines that
-container, the Lifecycle Object will move under it, and the `lifecycle` field
-described in [Operation Object Fields](#operation-object-fields) will be
-replaced.
+**Editor's note.** The `featureFields` field is expected to be defined by the
+OpenAPI Specification on the OpenAPI, Path Item, and Operation Objects. Until
+it is, this specification describes only its use on the Operation Object.
 
 Compatibility between versions of this specification and versions of the OpenAPI
 Specification is determined by publication date. The rules for determining
@@ -101,17 +101,18 @@ compatible version pairs are documented in [TODO: link or section].
 
 ## Definitions
 
-### Operation Object Fields
+### Feature Fields
 
 When a document declares `lifecycle` in its `features` field, the following
-field is added to the [Operation Object](https://spec.openapis.org/oas/latest.html#operation-object):
+key is defined in the `featureFields` of the
+[Operation Object](https://spec.openapis.org/oas/latest.html#operation-object):
 
-| Field Name | Type | Description |
+| Key | Type | Description |
 | ---- | ---- | ---- |
 | `lifecycle` | [Lifecycle Object](#lifecycle-object) | Deprecation and sunset details for this operation. |
 
-A `lifecycle` field on an Operation Object in a document that does not
-declare `lifecycle` in `features` is not governed by this specification.
+A `lifecycle` key in `featureFields` in a document that does not declare
+`lifecycle` in `features` is not governed by this specification.
 
 ### Lifecycle Object
 
@@ -149,8 +150,9 @@ The Operation Object's `deprecated` field is the authoritative signal of
 whether an operation is deprecated. The Lifecycle Object only adds detail to
 an operation that `deprecated` already marks as deprecated.
 
-An Operation Object with a `lifecycle` field MUST set `deprecated: true`.
-If a `lifecycle` field is present and `deprecated` is absent or `false`, the
+An Operation Object with a Lifecycle Object in `featureFields` MUST set
+`deprecated: true`. If a Lifecycle Object is present and `deprecated` is
+absent or `false`, the
 OpenAPI Description is invalid, and tools MUST report an error rather than
 silently ignore the Lifecycle Object.
 
@@ -159,7 +161,7 @@ To announce a deprecation that takes effect in the future, set
 field.
 
 This specification does not change the meaning of `deprecated: true` when
-there is no `lifecycle` field. An operation can be marked deprecated without
+there is no Lifecycle Object. An operation can be marked deprecated without
 this SAF, as before, which allows APIs to adopt the Lifecycle Object
 gradually. The full value comes from using both: `deprecated: true` as the
 signal that existing tools already recognize, and the Lifecycle Object for
@@ -203,21 +205,22 @@ paths:
       operationId: listFlights_v1
       summary: List all flights
       deprecated: true
-      lifecycle:
-        date: "2025-01-15T00:00:00Z"
-        reason: "Replaced by v2 API with improved performance."
-        sunset:
-          date: "2025-07-01T00:00:00Z"
-        externalLinks:
-          - kind: deprecation
-            summary: Migration guide
-            url: https://docs.example.com/migrate
-          - kind: successor-version
-            summary: Flights API v2
-            url: https://api.example.com/v2/openapi.yaml
-          - kind: sunset
-            summary: API sunset policy
-            url: https://docs.example.com/sunset-policy
+      featureFields:
+        lifecycle:
+          date: "2025-01-15T00:00:00Z"
+          reason: "Replaced by v2 API with improved performance."
+          sunset:
+            date: "2025-07-01T00:00:00Z"
+          externalLinks:
+            - kind: deprecation
+              summary: Migration guide
+              url: https://docs.example.com/migrate
+            - kind: successor-version
+              summary: Flights API v2
+              url: https://api.example.com/v2/openapi.yaml
+            - kind: sunset
+              summary: API sunset policy
+              url: https://docs.example.com/sunset-policy
 ```
 
 #### Complete OpenAPI Description Example
@@ -256,34 +259,35 @@ paths:
         - url: https://docs.example.com/flights/v1
           summary: Flights API v1 reference
           kind: api-docs
-      lifecycle:
-        date: "2025-01-15T00:00:00Z"
-        reason: "Replaced by v2 API with improved performance."
-        sunset:
-          date: "2025-07-01T00:00:00Z"
-        externalLinks:
-          - kind: deprecation
-            summary: Migrating from Flights v1 to v2
-            description: |
-              Step-by-step guide covering renamed query parameters and the
-              new cursor-based pagination.
-            url: https://docs.example.com/migrate
-          - kind: successor-version
-            summary: Flights API v2
-            description: Use `listFlights_v2` (`GET /v2/flights`) instead.
-            url: https://api.example.com/v2/openapi.yaml
-          - kind: sunset
-            summary: API sunset policy
-            url: https://docs.example.com/sunset-policy
-          - kind: changelog
-            summary: Changelog entry announcing the v1 deprecation
-            url: https://docs.example.com/changelog#2025-01-15
-          - kind: announcement
-            summary: Sunset announcement
-            description: |
-              Timeline, support contacts, and FAQ for the retirement of
-              `GET /v1/flights`.
-            url: https://status.example.com/announcements/flights-v1-sunset
+      featureFields:
+        lifecycle:
+          date: "2025-01-15T00:00:00Z"
+          reason: "Replaced by v2 API with improved performance."
+          sunset:
+            date: "2025-07-01T00:00:00Z"
+          externalLinks:
+            - kind: deprecation
+              summary: Migrating from Flights v1 to v2
+              description: |
+                Step-by-step guide covering renamed query parameters and the
+                new cursor-based pagination.
+              url: https://docs.example.com/migrate
+            - kind: successor-version
+              summary: Flights API v2
+              description: Use `listFlights_v2` (`GET /v2/flights`) instead.
+              url: https://api.example.com/v2/openapi.yaml
+            - kind: sunset
+              summary: API sunset policy
+              url: https://docs.example.com/sunset-policy
+            - kind: changelog
+              summary: Changelog entry announcing the v1 deprecation
+              url: https://docs.example.com/changelog#2025-01-15
+            - kind: announcement
+              summary: Sunset announcement
+              description: |
+                Timeline, support contacts, and FAQ for the retirement of
+                `GET /v1/flights`.
+              url: https://status.example.com/announcements/flights-v1-sunset
       responses:
         "200":
           description: A list of flights.
@@ -419,7 +423,7 @@ with that shape:
 
 From April 2026 onward, the design shifted to the operation-scoped model in
 this document: `deprecation` (renamed `Lifecycle Object`, placed in the
-Operation Object's `lifecycle` field, and enabled through the root `features`
+Operation Object's `featureFields`, and enabled through the root `features`
 declaration per the [SAF](https://github.com/OAI/OpenAPI-Specification/pull/5447)
 convention) is the primary object, with `sunset` nested inside it, and
 `gracePeriod` was dropped as derivable from `deprecation.date` and
