@@ -33,15 +33,9 @@ fields to the `Deprecation`, `Sunset`, and `Link` headers, so tooling can treat
 the metadata as either documentation or a generation source for those
 headers, per its needs.
 
-**Scope.** The Lifecycle Object applies at the Operation Object level only. An
-earlier draft explored a root-level, document-wide object (see
-[Appendix A](#appendix-a--revision-history)), but SIG discussion concluded
-that a single OpenAPI document does not necessarily describe exactly one API,
-so a document-wide deprecation signal does not generalize; see
-[sig-lifecycle discussion #5](https://github.com/OAI/sig-lifecycle/discussions/5).
-Applying the same lifecycle metadata uniformly across many operations remains
-the job of [Overlays](https://spec.openapis.org/overlay/latest.html), not of
-this object.
+**Scope.** The Lifecycle Object applies only to the Operation Object (see
+[Feature Fields](#feature-fields)). To apply the same lifecycle metadata to
+many operations, use [Overlays](https://spec.openapis.org/overlay/latest.html).
 
 ## HTTP Deprecation and Sunset Signals
 
@@ -124,6 +118,10 @@ key is defined in the `featureFields` of the
 | Key | Type | Description |
 | ---- | ---- | ---- |
 | `lifecycle` | [Lifecycle Object](#lifecycle-object) | Deprecation and sunset details for this operation. |
+
+The `lifecycle` key is defined only for the Operation Object. A `lifecycle`
+key in the `featureFields` of any other object, such as the OpenAPI Object or
+a Path Item Object, is invalid, and tools MUST report an error.
 
 A `lifecycle` key in `featureFields` in a document that does not declare
 `lifecycle` in `features` is not governed by this specification.
