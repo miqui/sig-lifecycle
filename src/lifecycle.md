@@ -43,11 +43,6 @@ Applying the same lifecycle metadata uniformly across many operations remains
 the job of [Overlays](https://spec.openapis.org/overlay/latest.html), not of
 this object.
 
-**Non-goal.** This SAF does not replace `deprecated: true`, which
-remains the coarse signal tooling already recognizes (for example, to gray out
-an operation in Swagger UI). The Lifecycle Object is additional detail used
-alongside it.
-
 ## Relationship to the OpenAPI Specification
 
 The Lifecycle Specification is a companion specification defining a
