@@ -103,9 +103,10 @@ paths:
 OpenAPI Specification on the OpenAPI, Path Item, and Operation Objects. Until
 it is, this specification describes only its use on the Operation Object.
 
-Compatibility between versions of this specification and versions of the OpenAPI
-Specification is determined by publication date. The rules for determining
-compatible version pairs are documented in [TODO: link or section].
+This version of this specification is compatible with OAS 3.3, the first
+version of the OAS to support SAFs, and with later OAS 3.x versions. Only the
+major and minor version numbers determine compatibility, as described in
+[OpenAPI and SAF Specification Versions Across Multiple Documents](https://github.com/OAI/OpenAPI-Specification/blob/v3.3-dev/src/oas.md#openapi-and-saf-specification-versions-across-multiple-documents).
 
 ## Definitions
 
@@ -386,7 +387,7 @@ support in the API implementation or gateway. Headers are only generated for
 operations with `deprecated: true`; see
 [Relationship to `deprecated`](#relationship-to-deprecated).
 
-Tools that do generate headers from a Lifecycle Object SHOULD use the
+Tools that generate headers from a Lifecycle Object should use the
 following mapping:
 
 | Lifecycle Object field | Generated header | RFC |
